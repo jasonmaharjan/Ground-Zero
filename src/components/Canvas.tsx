@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from "react";
 const CANVAS_DEFAULT_WIDTH = 1100;
 const CANVAS_DEFAULT_HEIGHT = 500;
 
+const C_MENU_WIDTH = 200;
+const C_MENU_HEIGHT = 400;
+
 const STARTING_POSITION = { x: 0, y: 350 };
 const PLAYER_WIDTH = 64;
 const PLAYER_HEIGHT = 64;
@@ -25,6 +28,8 @@ const CanvasGame: React.FC = () => {
     const [direction, setDirection] = useState(0);
     const [frameIndex, setFrameIndex] = useState(0);
 
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+
     // on initial load
     useEffect(() => {
         stepSound.current = new Audio("/footsteps_2.mp3");
@@ -45,6 +50,10 @@ const CanvasGame: React.FC = () => {
 
         const handleKeyDown = (event: KeyboardEvent) => {
             keys.current[event.key] = true;
+
+            if (event.key === "Enter") {
+                setIsContextMenuOpen(prevVal => !prevVal);
+            }
 
             // Start footsteps sound if not already playing
             if (stepSound.current && MOVEMENT_KEYS.includes(event.key) && stepSound.current.paused) {
@@ -159,6 +168,23 @@ const CanvasGame: React.FC = () => {
                     PLAYER_WIDTH,
                     PLAYER_HEIGHT
                 );
+            }
+
+            // add items to the scene under certain key press
+            if (isContextMenuOpen) {
+                ctx.fillStyle = "rgba(163, 106, 210, 1)";
+                ctx.fillRect(850, 50, 200, 200), (ctx.fillStyle = "white");
+
+                ctx.strokeStyle = "rgb(192, 192, 19)";
+                ctx.lineWidth = 3; // border thickness
+                ctx.strokeRect(850, 50, 200, 200);
+
+                ctx.font = "20px Sans-sherif";
+                ctx.fillStyle = "yellow";
+                ctx.fillText("Relax", 875, 50 + 40);
+                ctx.fillText("Overthink", 875, 50 + 80);
+                ctx.fillText("Contemplate", 875, 50 + 120);
+                ctx.fillText("Exit", 875, 50 + 160);
             }
 
             requestAnimationFrame(drawScene);
