@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect, useRef } from "react";
+import "./App.css";
+import { MdOutlineMusicNote } from "react-icons/md";
+import { MdOutlineMusicOff } from "react-icons/md";
+import Canvas from "./components/Canvas";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const bgMusic = useRef<HTMLAudioElement | null>(null);
+    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+    useEffect(() => {
+        bgMusic.current = new Audio("/music.mp3");
+        bgMusic.current.loop = true; // Enable background music looping
+        bgMusic.current.volume = 0.8; // Set bg volume to 80%
+    }, []);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    const toggleMusic = () => {
+        if (!bgMusic.current) return;
+
+        if (isMusicPlaying) {
+            bgMusic.current.pause();
+        } else {
+            bgMusic.current.play().catch(err => console.error("Background music error:", err));
+        }
+
+        setIsMusicPlaying(!isMusicPlaying);
+    };
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+                {isMusicPlaying ? (
+                    <MdOutlineMusicNote onClick={toggleMusic} style={{ cursor: "pointer", fontSize: "3rem", fill: "purple" }} />
+                ) : (
+                    <MdOutlineMusicOff onClick={toggleMusic} style={{ cursor: "pointer", fontSize: "3rem", fill: "purple" }} />
+                )}
+            </div>
+            <Canvas />
+        </div>
+    );
 }
 
-export default App
+export default App;
