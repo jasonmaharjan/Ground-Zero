@@ -13,6 +13,7 @@ const SPEED = 1;
 const FF_SPEED = 4;
 const SPRITE_SHEET_COLS = 4;
 const MOVEMENT_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "W", "A", "S", "D"];
+const FF_HOTKEY = "Shift";
 const TERRAIN_TYPES = { GRASS: "Grass", WATER: "Water", STONE: "Stone" };
 
 const CanvasGame: React.FC = () => {
@@ -43,12 +44,12 @@ const CanvasGame: React.FC = () => {
 
         waterStepSound.current = new Audio("/water_footsteps.mp3");
         waterStepSound.current.loop = false; // Enable loop while moving
-        waterStepSound.current.volume = 0.25; // Set footstep volume to 50%
+        waterStepSound.current.volume = 0.5; // Set footstep volume to 50%
         waterStepSound.current.playbackRate = 1.5;
 
         collisionSound.current = new Audio("/collision.mp3");
         collisionSound.current.loop = false; // Enable loop while colliding
-        collisionSound.current.volume = 0.25; // Set collision volume to 50%
+        collisionSound.current.volume = 0.5; // Set collision volume to 50%
         collisionSound.current.playbackRate = 1.25;
 
         // load images
@@ -73,11 +74,20 @@ const CanvasGame: React.FC = () => {
 
             // Start footsteps sound if not already playing
             if (stepSound.current && MOVEMENT_KEYS.includes(event.key) && stepSound.current.paused) {
+                // increase playback speed if hotkey is pressed with any movement key
+
+                console.log(event.key);
+                if (event.key === FF_HOTKEY) {
+                    stepSound.current.playbackRate = 10;
+                }
                 stepSound.current.play().catch((err: Error) => console.error("Error playing footsteps sound:", err));
             }
 
             // Start water footsteps sound if not already playing (and terran is set as water)
             if (terrain === TERRAIN_TYPES.WATER && waterStepSound.current && MOVEMENT_KEYS.includes(event.key) && waterStepSound.current.paused) {
+                if (event.key === "Shift") {
+                    waterStepSound.current.playbackRate = 5;
+                }
                 waterStepSound.current.play().catch((err: Error) => console.error("Error playing footsteps sound:", err));
             }
 

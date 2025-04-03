@@ -10,7 +10,7 @@ function App() {
     useEffect(() => {
         bgMusic.current = new Audio("/music.mp3");
         bgMusic.current.loop = true; // Enable background music looping
-        bgMusic.current.volume = 0.8; // Set bg volume to 80%
+        bgMusic.current.volume = 0.5; // Set bg volume to 80%
     }, []);
 
     const toggleMusic = () => {
