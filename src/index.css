@@ -1,7 +1,7 @@
 :root {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: "PokeFont", sans-serif;
     line-height: 1.5;
-    font-weight: 400;
+    font-weight: 600;
 
     color-scheme: light dark;
     color: rgba(255, 255, 255, 0.87);
@@ -11,6 +11,13 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+@font-face {
+    font-family: "PokeFont";
+    src: url("/src/assets/fonts/font.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
 
 a {
@@ -34,6 +41,11 @@ body {
 h1 {
     font-size: 3.2em;
     line-height: 1.1;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
 }
 
 button {

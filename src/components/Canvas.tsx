@@ -2,21 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import bgImageAsset from "@/assets/images/bg_3.png";
 import playerImageAsset from "@/assets/images/player.png";
 
-import footStepSoundEffect from "@/assets/sounds/footsteps_1.mp3";
+import footStepSoundEffect from "@/assets/sounds/footsteps_2.mp3";
 import waterFootStepSoundEffect from "@/assets/sounds/water_footsteps.mp3";
 import collisionSoundEffect from "@/assets/sounds/collision.mp3";
+
+import ContextMenu from "../components/Context";
 
 const CANVAS_DEFAULT_WIDTH = 1100;
 const CANVAS_DEFAULT_HEIGHT = 500;
 
-// const C_MENU_WIDTH = 200;
-// const C_MENU_HEIGHT = 400;
-
-const STARTING_POSITION = { x: 0, y: 350 };
+const STARTING_POSITION = { x: 350, y: 350 };
 const PLAYER_WIDTH = 64;
 const PLAYER_HEIGHT = 64;
 const SPEED = 1;
-const FF_SPEED = 4;
+const FF_SPEED = 2;
 const SPRITE_SHEET_COLS = 4;
 const MOVEMENT_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "W", "A", "S", "D"];
 const FF_HOTKEY = "Shift";
@@ -60,14 +59,12 @@ const CanvasGame: React.FC = () => {
 
         // load images
         const playerImg = new Image();
-        // playerImg.src = import.meta.env.MODE === "production" ? `${PROD_IMAGE_BASE_PATH}/player.png` : "/images/player.png";
         playerImg.src = playerImageAsset;
         playerImg.onload = () => {
             playerSprite.current = playerImg;
         };
 
         const bgImg = new Image();
-        // bgImg.src = import.meta.env.MODE === "production" ? `${PROD_IMAGE_BASE_PATH}/bg_3.png` : "/images/bg_3.png";
         bgImg.src = bgImageAsset;
         bgImg.onload = () => {
             bgImage.current = bgImg;
@@ -84,7 +81,6 @@ const CanvasGame: React.FC = () => {
             if (stepSound.current && MOVEMENT_KEYS.includes(event.key) && stepSound.current.paused) {
                 // increase playback speed if hotkey is pressed with any movement key
 
-                console.log(event.key);
                 if (event.key === FF_HOTKEY) {
                     stepSound.current.playbackRate = 10;
                 }
@@ -179,7 +175,7 @@ const CanvasGame: React.FC = () => {
             }
 
             // Stop animation if not moving
-            if (frameCounter % 25 === 0) {
+            if (frameCounter % 20 === 0) {
                 setFrameIndex(prev => (isMoving ? (prev + 1) % SPRITE_SHEET_COLS : 0));
             }
             frameCounter++;
@@ -220,23 +216,6 @@ const CanvasGame: React.FC = () => {
                 );
             }
 
-            // add items to the scene under certain key press
-            if (isContextMenuOpen) {
-                ctx.fillStyle = "rgba(163, 106, 210, 1)";
-                ctx.fillRect(850, 50, 200, 200), (ctx.fillStyle = "white");
-
-                ctx.strokeStyle = "rgb(192, 192, 19)";
-                ctx.lineWidth = 3; // border thickness
-                ctx.strokeRect(850, 50, 200, 200);
-
-                ctx.font = "20px Sans-sherif";
-                ctx.fillStyle = "yellow";
-                ctx.fillText("Relax", 875, 50 + 40);
-                ctx.fillText("Overthink", 875, 50 + 80);
-                ctx.fillText("Contemplate", 875, 50 + 120);
-                ctx.fillText("Exit", 875, 50 + 160);
-            }
-
             requestAnimationFrame(drawScene);
         };
 
@@ -244,14 +223,19 @@ const CanvasGame: React.FC = () => {
     }, [positionRef.current, frameIndex, directionRef.current]);
 
     return (
-        <>
+        <div style={{ position: "relative" }}>
             <canvas
                 ref={canvasRef}
                 width={CANVAS_DEFAULT_WIDTH}
                 height={CANVAS_DEFAULT_HEIGHT}
                 style={{ border: "2.5px solid #c0c013", borderRadius: "1rem", boxShadow: "2px 4px 20px 2px #353238" }}
             />
-        </>
+            {isContextMenuOpen && (
+                <div className="context-overlay">
+                    <ContextMenu isOpen={isContextMenuOpen} />
+                </div>
+            )}
+        </div>
     );
 };
 
