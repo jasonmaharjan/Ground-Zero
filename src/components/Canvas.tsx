@@ -1,4 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import bgImageAsset from "@/assets/images/bg_3.png";
+import playerImageAsset from "@/assets/images/player.png";
+
+import footStepSoundEffect from "@/assets/sounds/footsteps_1.mp3";
+import waterFootStepSoundEffect from "@/assets/sounds/water_footsteps.mp3";
+import collisionSoundEffect from "@/assets/sounds/collision.mp3";
 
 const CANVAS_DEFAULT_WIDTH = 1100;
 const CANVAS_DEFAULT_HEIGHT = 500;
@@ -37,30 +43,32 @@ const CanvasGame: React.FC = () => {
     // on initial load
     useEffect(() => {
         // load sound effects
-        stepSound.current = new Audio("/footsteps_2.mp3");
+        stepSound.current = new Audio(footStepSoundEffect);
         stepSound.current.loop = false; // Enable loop while moving
         stepSound.current.volume = 0.5; // Set footstep volume to 50%
         stepSound.current.playbackRate = 2;
 
-        waterStepSound.current = new Audio("/water_footsteps.mp3");
+        waterStepSound.current = new Audio(waterFootStepSoundEffect);
         waterStepSound.current.loop = false; // Enable loop while moving
         waterStepSound.current.volume = 0.5; // Set footstep volume to 50%
         waterStepSound.current.playbackRate = 1.5;
 
-        collisionSound.current = new Audio("/collision.mp3");
+        collisionSound.current = new Audio(collisionSoundEffect);
         collisionSound.current.loop = false; // Enable loop while colliding
         collisionSound.current.volume = 0.5; // Set collision volume to 50%
         collisionSound.current.playbackRate = 1.25;
 
         // load images
         const playerImg = new Image();
-        playerImg.src = "/player.png";
+        // playerImg.src = import.meta.env.MODE === "production" ? `${PROD_IMAGE_BASE_PATH}/player.png` : "/images/player.png";
+        playerImg.src = playerImageAsset;
         playerImg.onload = () => {
             playerSprite.current = playerImg;
         };
 
         const bgImg = new Image();
-        bgImg.src = "/bg_3.png";
+        // bgImg.src = import.meta.env.MODE === "production" ? `${PROD_IMAGE_BASE_PATH}/bg_3.png` : "/images/bg_3.png";
+        bgImg.src = bgImageAsset;
         bgImg.onload = () => {
             bgImage.current = bgImg;
         };

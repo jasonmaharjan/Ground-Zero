@@ -3,12 +3,13 @@ import "./App.css";
 import { MdOutlineMusicNote } from "react-icons/md";
 import { MdOutlineMusicOff } from "react-icons/md";
 import Canvas from "./components/Canvas";
+import backgroundMusic from "@/assets/sounds/music.mp3";
 
 function App() {
     const bgMusic = useRef<HTMLAudioElement | null>(null);
     const [isMusicPlaying, setIsMusicPlaying] = useState(false);
     useEffect(() => {
-        bgMusic.current = new Audio("/music.mp3");
+        bgMusic.current = new Audio(backgroundMusic);
         bgMusic.current.loop = true; // Enable background music looping
         bgMusic.current.volume = 0.5; // Set bg volume to 80%
     }, []);
