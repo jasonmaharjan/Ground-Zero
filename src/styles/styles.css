@@ -24,6 +24,7 @@
 }
 
 .context-menu {
+    border: none;
     padding: 1rem;
     background: rgba(163, 106, 210, 1);
     box-shadow: 2px 4px 20px 2px #75509496;
@@ -41,7 +42,32 @@
 .context-overlay {
     position: absolute;
     inset: 0;
-    background-color: #00000045;
+    background-color: #00000050;
     backdrop-filter: blur(1.5px);
     border-radius: 1rem;
+}
+
+.marquee-container {
+    width: 20rem;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    font-size: 2rem;
+}
+
+.marquee {
+    display: inline-block;
+    padding-left: 50%;
+    white-space: nowrap;
+    animation: marquee 16s ease-in infinite;
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(-100%);
+    }
 }

@@ -4,19 +4,22 @@ import { MdOutlineMusicNote } from "react-icons/md";
 import { MdOutlineMusicOff } from "react-icons/md";
 import { FaShuffle } from "react-icons/fa6";
 import Canvas from "./components/Canvas";
-import backgroundMusic1 from "@/assets/sounds/music_1.mp3";
-import backgroundMusic2 from "@/assets/sounds/music_2.mp3";
-import backgroundMusic3 from "@/assets/sounds/music_3.mp3";
 import ButtonWrapper from "./components/ButtonWrapper";
+import MarqueeText from "./components/MarqueeText";
+
+import { randomizeRadio } from "./utils/bgMusic";
 
 function App() {
     const bgMusic = useRef<HTMLAudioElement | null>(null);
     const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+    const [message, setMessage] = useState<string>("");
+
     useEffect(() => {
-        // load all background music
-        bgMusic.current = new Audio(backgroundMusic1);
+        const { musicSrc, message } = randomizeRadio();
+        bgMusic.current = new Audio(musicSrc);
         bgMusic.current.loop = true; // Enable background music looping
         bgMusic.current.volume = 0.5; // Set bg volume to 80%
+        setMessage(message);
     }, []);
 
     const toggleMusic = () => {
@@ -41,35 +44,15 @@ function App() {
             bgMusic.current.pause();
             bgMusic.current.currentTime = 0; // reset the current music
 
-            const randomMusicIndex = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
-            switch (randomMusicIndex) {
-                case 0:
-                    bgMusic.current = new Audio(backgroundMusic1);
-                    bgMusic.current.loop = true; // Enable background music looping
-                    bgMusic.current.volume = 0.5; // Set bg volume to 50%
-                    bgMusic.current.play().catch(err => console.error("Background music error:", err));
-                    return;
-                case 1:
-                    bgMusic.current = new Audio(backgroundMusic2);
-                    bgMusic.current.loop = true; // Enable background music looping
-                    bgMusic.current.volume = 0.5; // Set bg volume to 50%
-                    bgMusic.current.play().catch(err => console.error("Background music error:", err));
-                    return;
-                case 2:
-                    bgMusic.current = new Audio(backgroundMusic3);
-                    bgMusic.current.loop = true; // Enable background music looping
-                    bgMusic.current.volume = 0.5; // Set bg volume to 50%
-                    bgMusic.current.play().catch(err => console.error("Background music error:", err));
-                    return;
-                default:
-                    bgMusic.current = new Audio(backgroundMusic1);
-                    bgMusic.current.loop = true; // Enable background music looping
-                    bgMusic.current.volume = 0.5; // Set bg volume to 50%
-                    bgMusic.current.play().catch(err => console.error("Background music error:", err));
-                    return;
-            }
+            const { musicSrc, message } = randomizeRadio();
+            bgMusic.current = new Audio(musicSrc);
+            bgMusic.current.loop = true; // Enable background music looping
+            bgMusic.current.volume = 0.5; // Set bg volume to 50%
+            bgMusic.current.play().catch(err => console.error("Background music error:", err));
+            setMessage(message);
         }
     };
+
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div className="menu-wrapper">
@@ -85,7 +68,7 @@ function App() {
                 <ButtonWrapper>
                     <FaShuffle onClick={shuffleMusic} style={{ fill: "white" }} />
                 </ButtonWrapper>
-                {bgMusic.current && <div>Playing Tune :-)</div>}
+                {isMusicPlaying && bgMusic.current && message && <MarqueeText message={message} />}
             </div>
             <Canvas />
         </div>

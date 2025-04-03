@@ -5,6 +5,7 @@ import playerImageAsset from "@/assets/images/player.png";
 import footStepSoundEffect from "@/assets/sounds/footsteps_2.mp3";
 import waterFootStepSoundEffect from "@/assets/sounds/water_footsteps.mp3";
 import collisionSoundEffect from "@/assets/sounds/collision.mp3";
+import menuSoundEffect from "@/assets/sounds/menu.mp3";
 
 import ContextMenu from "../components/Context";
 
@@ -23,6 +24,10 @@ const TERRAIN_TYPES = { GRASS: "Grass", WATER: "Water", STONE: "Stone" };
 
 const CanvasGame: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const positionRef = useRef(STARTING_POSITION);
+    const directionRef = useRef(0);
+    const contextMenuRef = useRef<{ focus: () => void } | null>(null);
+
     const playerSprite = useRef<HTMLImageElement | null>(null);
     const animationFrameId = useRef<number | null>(null);
     const keys = useRef<Record<string, boolean>>({});
@@ -30,10 +35,8 @@ const CanvasGame: React.FC = () => {
     const stepSound = useRef<HTMLAudioElement | null>(null);
     const waterStepSound = useRef<HTMLAudioElement | null>(null);
     const collisionSound = useRef<HTMLAudioElement | null>(null);
+    const menuSound = useRef<HTMLAudioElement | null>(null);
     const [terrain, setTerrain] = useState(TERRAIN_TYPES.GRASS);
-
-    const positionRef = useRef(STARTING_POSITION);
-    const directionRef = useRef(0);
 
     const [frameIndex, setFrameIndex] = useState(0);
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -57,6 +60,11 @@ const CanvasGame: React.FC = () => {
         collisionSound.current.volume = 0.5; // Set collision volume to 50%
         collisionSound.current.playbackRate = 1.25;
 
+        menuSound.current = new Audio(menuSoundEffect);
+        menuSound.current.loop = false; // Enable loop while opening/interacting with menu
+        menuSound.current.volume = 0.5; // Set collision volume to 50%
+        menuSound.current.playbackRate = 1.25;
+
         // load images
         const playerImg = new Image();
         playerImg.src = playerImageAsset;
@@ -74,7 +82,14 @@ const CanvasGame: React.FC = () => {
             keys.current[event.key] = true;
 
             if (event.key === "Enter") {
+                if (menuSound.current) {
+                    menuSound.current.play().catch((err: Error) => console.error("Error playing footsteps sound:", err));
+                }
                 setIsContextMenuOpen(prevVal => !prevVal);
+                // Focus on context menu after opening
+                setTimeout(() => {
+                    contextMenuRef.current?.focus();
+                }, 0);
             }
 
             // Start footsteps sound if not already playing
@@ -222,6 +237,10 @@ const CanvasGame: React.FC = () => {
         drawScene();
     }, [positionRef.current, frameIndex, directionRef.current]);
 
+    const toggleMenu = () => {
+        setIsContextMenuOpen(!isContextMenuOpen);
+    };
+
     return (
         <div style={{ position: "relative" }}>
             <canvas
@@ -232,7 +251,7 @@ const CanvasGame: React.FC = () => {
             />
             {isContextMenuOpen && (
                 <div className="context-overlay">
-                    <ContextMenu isOpen={isContextMenuOpen} />
+                    <ContextMenu isOpen={isContextMenuOpen} toggleMenu={toggleMenu} ref={contextMenuRef} />
                 </div>
             )}
         </div>
