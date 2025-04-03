@@ -24,8 +24,10 @@ const CanvasGame: React.FC = () => {
     const bgImage = useRef<HTMLImageElement | null>(null);
     const stepSound = useRef<HTMLAudioElement | null>(null);
 
-    const [position, setPosition] = useState<Position>(STARTING_POSITION);
-    const [direction, setDirection] = useState(0);
+    const positionRef = useRef(STARTING_POSITION);
+    const directionRef = useRef(0);
+
+    // const [direction, setDirection] = useState(0);
     const [frameIndex, setFrameIndex] = useState(0);
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -88,45 +90,37 @@ const CanvasGame: React.FC = () => {
 
         const updatePosition = () => {
             let isMoving = false;
-            setPosition(prev => {
-                let { x, y } = prev;
-                let moveSpeed = keys.current["Shift"] ? SPEED + FF_SPEED : SPEED;
+            let { x, y } = positionRef.current;
+            let moveSpeed = keys.current["Shift"] ? SPEED + FF_SPEED : SPEED;
 
-                let newX = x;
-                let newY = y;
-                let newDirection = direction;
+            let newDirection = directionRef.current;
 
-                if (keys.current["ArrowRight"]) {
-                    newX += moveSpeed;
-                    newDirection = 2; // Right
-                    isMoving = true;
-                }
-                if (keys.current["ArrowLeft"]) {
-                    newX -= moveSpeed;
-                    newDirection = 1; // Left
-                    isMoving = true;
-                }
-                if (keys.current["ArrowUp"]) {
-                    newY -= moveSpeed;
-                    newDirection = 3; // Up
-                    isMoving = true;
-                }
-                if (keys.current["ArrowDown"]) {
-                    newY += moveSpeed;
-                    newDirection = 0; // Down
-                    isMoving = true;
-                }
+            if (keys.current["ArrowRight"]) {
+                x += moveSpeed;
+                newDirection = 2; // Right
+                isMoving = true;
+            }
+            if (keys.current["ArrowLeft"]) {
+                x -= moveSpeed;
+                newDirection = 1; // Left
+                isMoving = true;
+            }
+            if (keys.current["ArrowUp"]) {
+                y -= moveSpeed;
+                newDirection = 3; // Up
+                isMoving = true;
+            }
+            if (keys.current["ArrowDown"]) {
+                y += moveSpeed;
+                newDirection = 0; // Down
+                isMoving = true;
+            }
 
-                if (direction !== newDirection) {
-                    setDirection(newDirection);
-                }
+            directionRef.current = newDirection;
 
-                if (!detectCollision(newX, newY)) {
-                    return { x: newX, y: newY };
-                }
-
-                return { x, y };
-            });
+            if (!detectCollision(x, y)) {
+                positionRef.current = { x, y };
+            }
 
             // Stop animation if not moving
             if (frameCounter % 25 === 0) {
@@ -160,11 +154,11 @@ const CanvasGame: React.FC = () => {
                 ctx.drawImage(
                     playerSprite.current,
                     frameIndex * PLAYER_WIDTH,
-                    direction * PLAYER_HEIGHT,
+                    directionRef.current * PLAYER_HEIGHT,
                     PLAYER_WIDTH,
                     PLAYER_HEIGHT,
-                    position.x,
-                    position.y,
+                    positionRef.current.x,
+                    positionRef.current.y,
                     PLAYER_WIDTH,
                     PLAYER_HEIGHT
                 );
@@ -191,7 +185,7 @@ const CanvasGame: React.FC = () => {
         };
 
         drawScene();
-    }, [position, frameIndex, direction]);
+    }, [positionRef.current, frameIndex, directionRef.current]);
 
     return (
         <>
