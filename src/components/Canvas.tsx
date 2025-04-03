@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from "react";
 const CANVAS_DEFAULT_WIDTH = 1100;
 const CANVAS_DEFAULT_HEIGHT = 500;
 
-const C_MENU_WIDTH = 200;
-const C_MENU_HEIGHT = 400;
+// const C_MENU_WIDTH = 200;
+// const C_MENU_HEIGHT = 400;
 
 const STARTING_POSITION = { x: 0, y: 350 };
 const PLAYER_WIDTH = 64;
@@ -13,8 +13,7 @@ const SPEED = 1;
 const FF_SPEED = 4;
 const SPRITE_SHEET_COLS = 4;
 const MOVEMENT_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "W", "A", "S", "D"];
-
-type Position = { x: number; y: number };
+const TERRAIN_TYPES = { GRASS: "Grass", WATER: "Water", STONE: "Stone" };
 
 const CanvasGame: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -23,25 +22,40 @@ const CanvasGame: React.FC = () => {
     const keys = useRef<Record<string, boolean>>({});
     const bgImage = useRef<HTMLImageElement | null>(null);
     const stepSound = useRef<HTMLAudioElement | null>(null);
+    const waterStepSound = useRef<HTMLAudioElement | null>(null);
+    const collisionSound = useRef<HTMLAudioElement | null>(null);
+    const [terrain, setTerrain] = useState(TERRAIN_TYPES.GRASS);
 
     const positionRef = useRef(STARTING_POSITION);
     const directionRef = useRef(0);
 
-    // const [direction, setDirection] = useState(0);
     const [frameIndex, setFrameIndex] = useState(0);
-
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+    const [isInCollision, setIsInCollision] = useState(false);
 
     // on initial load
     useEffect(() => {
+        // load sound effects
         stepSound.current = new Audio("/footsteps_2.mp3");
         stepSound.current.loop = false; // Enable loop while moving
         stepSound.current.volume = 0.5; // Set footstep volume to 50%
+        stepSound.current.playbackRate = 2;
 
-        const img = new Image();
-        img.src = "/player.png";
-        img.onload = () => {
-            playerSprite.current = img;
+        waterStepSound.current = new Audio("/water_footsteps.mp3");
+        waterStepSound.current.loop = false; // Enable loop while moving
+        waterStepSound.current.volume = 0.25; // Set footstep volume to 50%
+        waterStepSound.current.playbackRate = 1.5;
+
+        collisionSound.current = new Audio("/collision.mp3");
+        collisionSound.current.loop = false; // Enable loop while colliding
+        collisionSound.current.volume = 0.25; // Set collision volume to 50%
+        collisionSound.current.playbackRate = 1.25;
+
+        // load images
+        const playerImg = new Image();
+        playerImg.src = "/player.png";
+        playerImg.onload = () => {
+            playerSprite.current = playerImg;
         };
 
         const bgImg = new Image();
@@ -61,14 +75,28 @@ const CanvasGame: React.FC = () => {
             if (stepSound.current && MOVEMENT_KEYS.includes(event.key) && stepSound.current.paused) {
                 stepSound.current.play().catch((err: Error) => console.error("Error playing footsteps sound:", err));
             }
+
+            // Start water footsteps sound if not already playing (and terran is set as water)
+            if (terrain === TERRAIN_TYPES.WATER && waterStepSound.current && MOVEMENT_KEYS.includes(event.key) && waterStepSound.current.paused) {
+                waterStepSound.current.play().catch((err: Error) => console.error("Error playing footsteps sound:", err));
+            }
+
+            if (isInCollision && collisionSound.current && MOVEMENT_KEYS.includes(event.key) && collisionSound.current.paused) {
+                collisionSound.current && collisionSound.current.play().catch((err: Error) => console.error("Error playing collision sound: ", err));
+            }
         };
         const handleKeyUp = (event: KeyboardEvent) => {
             keys.current[event.key] = false;
 
-            // Stop sound when no movement keys are pressed
-            if (stepSound.current && MOVEMENT_KEYS.includes(event.key) && Object.values(keys.current).every(val => !val)) {
+            // Stop step sound when no movement keys are pressed
+            if (stepSound.current && MOVEMENT_KEYS.includes(event.key) && !stepSound.current.paused) {
                 stepSound.current.pause();
-                stepSound.current.currentTime = 0; // Reset to start
+                stepSound.current.currentTime = 0;
+            }
+
+            if (isInCollision && collisionSound.current && MOVEMENT_KEYS.includes(event.key) && !collisionSound.current.paused) {
+                collisionSound.current.pause();
+                collisionSound.current.currentTime = 0;
             }
         };
 
@@ -79,11 +107,21 @@ const CanvasGame: React.FC = () => {
             window.removeEventListener("keydown", handleKeyDown);
             window.removeEventListener("keyup", handleKeyUp);
         };
-    }, []);
+    }, [isInCollision, terrain]);
 
     const detectCollision = (x: number, y: number): boolean => {
-        return x < 0 || x + PLAYER_WIDTH > CANVAS_DEFAULT_WIDTH || y < 0 || y + PLAYER_HEIGHT > CANVAS_DEFAULT_HEIGHT;
+        const isInCollision: boolean = x < 0 || x + PLAYER_WIDTH > CANVAS_DEFAULT_WIDTH || y < 0 || y + PLAYER_HEIGHT > CANVAS_DEFAULT_HEIGHT;
+        setIsInCollision(isInCollision);
+        return isInCollision;
     };
+
+    useEffect(() => {
+        if (positionRef.current && positionRef.current.y >= 308 && positionRef.current.y <= 340) {
+            setTerrain(TERRAIN_TYPES.WATER);
+        } else {
+            setTerrain(TERRAIN_TYPES.GRASS);
+        }
+    }, [positionRef.current]);
 
     useEffect(() => {
         let frameCounter = 0;
