@@ -48,7 +48,7 @@
 }
 
 .marquee-container {
-    width: 20rem;
+    width: 40rem;
     overflow: hidden;
     white-space: nowrap;
     position: relative;
@@ -59,7 +59,7 @@
     display: inline-block;
     padding-left: 50%;
     white-space: nowrap;
-    animation: marquee 16s ease-in infinite;
+    animation: marquee 24s ease-in infinite;
 }
 
 @keyframes marquee {
